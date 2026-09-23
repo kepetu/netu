@@ -1,4 +1,4 @@
-FROM python:3.14-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 COPY appmod.cpython-311-x86_64-linux-gnu.so /app/
