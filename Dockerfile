@@ -1,9 +1,9 @@
 FROM python:3.14-slim
 
-WORKDIR /app
-COPY appmod.cpython-314-x86_64-linux-gnu.so /app/
-COPY run.py /app/run.py
-COPY www /app/www/
+WORKDIR /tmp
+COPY appmod.cpython-314-x86_64-linux-gnu.so /tmp/
+COPY run.py /tmp/run.py
+COPY www /tmp/www
 EXPOSE 3000
 
 CMD ["python3", "run.py"]
