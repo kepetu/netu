@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backyard Telemetry — notes from a small weather station</title>
+<style>
+body{font-family:Georgia,'Times New Roman',serif;max-width:44rem;margin:2.5rem auto;padding:0 1.25rem;color:#2c2c28;line-height:1.65;background:#fdfcf8}
+h1{font-size:1.65rem;margin:0}
+.tagline{color:#6f6f66;font-style:italic;margin:.2rem 0 1.6rem}
+h2{font-size:1.22rem;margin:0 0 .1rem}
+h2 a{color:inherit;text-decoration:none}
+.date{color:#8b8b80;font-size:.85rem;margin:0 0 1rem}
+article{margin:2.4rem 0}
+hr{border:0;border-top:1px solid #ddd8cc;margin:2.2rem 0}
+code{background:#f1eee4;padding:0 .3em;border-radius:3px;font-size:.9em}
+ul{padding-left:1.25rem}
+footer{margin-top:3rem;border-top:1px solid #ddd8cc;padding-top:1rem;color:#8b8b80;font-size:.85rem}
+</style>
+</head>
+<body>
+<h1>Backyard Telemetry</h1>
+<p class="tagline">Notes from a small weather station at the end of a garden.</p>
+
+<p>I keep a little weather station running in my backyard: a few sensors on a
+mast by the fence, a solar panel that mostly behaves, and an old Raspberry Pi
+on a shelf in the garage collecting everything. These are notes I write for
+myself whenever something breaks or puzzles me, so that future me (and anyone
+else fooling around with sensors on a budget) can skip the same mistakes.
+No ads, no tracking, no comments &mdash; just weather.</p>
+
+<hr>
+
+<article id="solar">
+<h2><a href="#solar">The solar panel was never the problem</a></h2>
+<p class="date">August 30, 2026</p>
+<p>The station has browned out twice this summer, both times after a stretch
+of overcast days. My working theory since June was that the 6V panel is simply
+too small for the load, and I very nearly ordered a bigger one. What stopped
+me was realizing I had never actually measured anything &mdash; I'd been
+reasoning from vibes, which is a poor way to do engineering and an expensive
+way to shop.</p>
+<p>So one Sunday I took the multimeter out to the fence post. Open-circuit
+voltage at noon under thin cloud: 6.4V, perfectly healthy. Same panel under
+load: 3.9V and sagging. A panel that loses 40% under load isn't weak, it's
+resisting &mdash; and the resistance turned out to be living in the little
+JST connector between the panel and the charge board, crusted green with five
+years of weather. I could measure a 0.8V drop across it by wiggling the plug
+while watching the meter.</p>
+<p>New connector, a smear of dielectric grease, and a proper strain relief so
+the cable weight no longer hangs off the pins. Since then the station has come
+through two consecutive gray weeks without a single dropout. For the record,
+the power budget it actually needs to survive: about 38&micro;A in deep sleep,
+a wake every ten minutes, and the radio on for roughly 40ms per sync. The
+original panel was never the problem. The connector was.</p>
+</article>
+
+<article id="dew">
+<h2><a href="#dew">BME280 and the dawn condensation problem</a></h2>
+<p class="date">May 9, 2026</p>
+<p>Every morning this spring, between roughly 05:40 and 07:10, the humidity
+graph pegged itself at 100% and stayed there like it was nailed. Pressure and
+temperature stayed sensible, so it wasn't the board dying. I swapped in two
+other BME280 chips I had in a drawer &mdash; same behavior, same window, same
+flat 100% line. Chips don't coordinate like that, so the constant was
+something else: the sensor was getting wet.</p>
+<p>Here's what I think was happening. The probe sits under a white cap that
+claims to be weatherproof, and overnight the plastic cools faster than the
+air. Moisture condenses on the inside of that cap, right over the sensing
+element, and the chip reports the only honest thing it can: 100% relative
+humidity, because it is sitting in a droplet. At dawn the sun warms the cap,
+the droplet evaporates, and the graph snaps back. Twice a day, every day,
+exactly like a lie that repeats itself.</p>
+<p>The fix was mechanical, not electrical: I moved the probe into a louvered
+radiation shield with real airflow, and swapped the solid cap for a membrane
+one. Against a sling psychrometer borrowed from the astronomy club, dawn
+readings now agree within 3&ndash;4% instead of inventing fog. Lesson
+written on the mast in my head: at dawn, 100% humidity usually means the
+sensor is wet, not the air.</p>
+</article>
+
+<article id="rain">
+<h2><a href="#rain">The rain gauge lies twice a day</a></h2>
+<p class="date">March 14, 2026</p>
+<p>The tipping-bucket gauge counts 0.2mm per tip, which sounds precise and is,
+as long as every drop that falls also gets counted. This winter I set it next
+to a manual gauge &mdash; a straight-sided jar with a ruler &mdash; and over
+six weeks the bucket counted 213mm where the jar held 195mm at first, then
+under 180mm after a dry spell, depending on how the evaporating water in the
+jar decided to behave. Both instruments were lying to me, in opposite
+directions, and neither knew it.</p>
+<p>The bucket's problems were more interesting. Three, in order of shame:
+it sat too low and collected splash from the fence rail; the funnel had no
+mesh, so one very committed blackbird had been using it as a personal
+drinking fountain all February; and on drizzle days, water sat in the bucket
+long enough between tips that evaporation stole a tip here and there. Small
+thefts add up &mdash; my guess is 5 to 10% across a wet month.</p>
+<p>Fixes: raised it to 1.2m on its own post away from anything it could
+bounce off, glued a fine stainless mesh over the funnel (the blackbird has
+filed a complaint), and leveled it properly with an actual spirit level
+instead of the eyeball method. Six-week rematch after the changes: 41mm
+bucket, 40mm jar, which is inside the error of my ruler technique. Good
+enough. The gauge still lies twice a day, as all gauges do &mdash; just less
+loudly now.</p>
+</article>
+
+<article id="hello">
+<h2><a href="#hello">Hello from the garden</a></h2>
+<p class="date">January 18, 2026</p>
+<p>First post, mostly to write down what's actually on the mast before I
+forget why any of it is there:</p>
+<ul>
+<li>a BME280 for temperature, humidity, and pressure, in the shield
+described in a later post,</li>
+<li>a DS18B20 buried under the tomato bed pretending to be a soil probe,</li>
+<li>a tipping-bucket rain gauge, 0.2mm per tip, currently on its third
+mounting bracket,</li>
+<li>a three-cup anemometer from a kit, which survived a named storm in
+February and earned permanent employment,</li>
+<li>an ESP32 doing the collecting, waking every ten minutes and pushing a
+batch of readings over wifi to the garage,</li>
+<li>and the Raspberry Pi, which stores it all and serves a small status
+stream I check from the train like other people check the news.</li>
+</ul>
+<p>The plan for this page is simple: whenever something breaks, I'll write
+down what it was. Whenever something works, I'll try to write down why,
+because those notes have a way of going missing exactly when they're needed.
+If you stumbled in from a search engine looking for sensor advice, hello
+&mdash; the rain gauge post is the one I wish I had read before buying
+three brackets.</p>
+</article>
+
+<footer>Powered by a Raspberry Pi Zero that would rather be sleeping. No
+cookies, no analytics, no comments &mdash; it's a weather station.</footer>
+</body>
+</html>
