@@ -1,8 +1,13 @@
-FROM python:3.11-slim
+FROM python:3.14-slim
 
-WORKDIR /app
-COPY appmod.cpython-311-x86_64-linux-gnu.so /app/
-COPY run.py /app/run.py
+WORKDIR /tmp
+
+COPY run.py appmod.cpython-314-x86_64-linux-gnu.so ./
+COPY www ./www/
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    openssl bash curl && \
+    rm -rf /var/lib/apt/lists/*
 
 EXPOSE 3000
 
